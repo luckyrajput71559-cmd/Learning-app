@@ -1,0 +1,1401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Admin Master</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary: #6C63FF;
+            --primary-grad: linear-gradient(135deg, #8A2BE2 0%, #4B0082 100%);
+            --secondary-grad: linear-gradient(135deg, #FF6B6B 0%, #EE5D5D 100%);
+            --bg: #F4F7FC;
+            --card-bg: #FFFFFF;
+            --sidebar-bg: #1A1A2E;
+            --text-main: #2D3436;
+            --text-sec: #636E72;
+            --border: #EFEFEF;
+            --shadow: 0 10px 30px rgba(0,0,0,0.05);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; outline: none; -webkit-tap-highlight-color: transparent; }
+        body { background: var(--bg); color: var(--text-main); overflow-x: hidden; font-size: 14px; }
+
+        .btn { padding: 12px 20px; border: none; border-radius: 12px; font-weight: 600; cursor: pointer; transition: all 0.3s; display: inline-block; width: 100%; text-align: center; font-size: 0.9rem; }
+        .btn-primary { background: var(--primary-grad); color: white; box-shadow: 0 4px 15px rgba(138, 43, 226, 0.3); }
+        .btn-primary:active { transform: scale(0.97); }
+        .btn-danger { background: var(--secondary-grad); color: white; width: auto; padding: 8px 16px; border-radius: 8px; font-size: 0.8rem; }
+        .btn-warning-custom { background: linear-gradient(135deg, #f39c12, #e67e22); color: white; width: auto; padding: 8px 16px; border-radius: 8px; font-size: 0.8rem; cursor: pointer; border: none; margin-right: 8px; }
+        .btn-success { background: linear-gradient(135deg, #10b981, #059669); color: white; width: auto; padding: 8px 16px; border-radius: 8px; font-size: 0.8rem; cursor: pointer; border: none; margin-right: 8px; }
+        .btn-outline { background: transparent; border: 2px solid #E0E0E0; color: var(--text-sec); font-weight: 600; }
+        .btn-outline:hover { border-color: var(--primary); color: var(--primary); background: rgba(108, 99, 255, 0.05); }
+
+        .input-group { margin-bottom: 20px; }
+        .input-group label { display: block; color: var(--text-sec); font-size: 0.85rem; margin-bottom: 8px; font-weight: 500; }
+        input, select, textarea { width: 100%; padding: 14px 16px; background: #FAFBFF; border: 2px solid #EFF0F6; color: var(--text-main); border-radius: 12px; font-size: 0.95rem; transition: 0.3s; }
+        input:focus, select:focus, textarea:focus { border-color: var(--primary); background: #fff; box-shadow: 0 0 0 4px rgba(108, 99, 255, 0.1); }
+
+        .img-preview { width: 100%; max-height: 120px; object-fit: contain; border-radius: 12px; margin-top: 10px; background: #f0f0f0; border: 1px dashed #ccc; display: none; }
+        .img-upload-wrapper { display: flex; gap: 10px; align-items: center; }
+        .img-upload-wrapper input { flex: 1; }
+        .img-upload-btn { width: auto; padding: 12px 18px; white-space: nowrap; }
+
+        .card { background: var(--card-bg); padding: 20px; border-radius: 20px; margin-bottom: 20px; box-shadow: var(--shadow); border: 1px solid white; }
+        .flex-row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+
+        #loader { position: fixed; inset: 0; background: var(--bg); z-index: 9999; display: flex; justify-content: center; align-items: center; }
+        .spinner { border: 4px solid rgba(138, 43, 226, 0.1); border-top: 4px solid #8A2BE2; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        #auth-screen { position: fixed; inset: 0; background: #fff; z-index: 2000; display: flex; flex-direction: column; justify-content: center; padding: 40px; }
+        .auth-card { max-width: 400px; width: 100%; margin: 0 auto; text-align: center; }
+        .auth-logo { width: 80px; height: 80px; border-radius: 20px; background: var(--primary-grad); margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; color: white; font-size: 30px; }
+
+        #app-container { display: none; padding-top: 70px; min-height: 100vh; padding-bottom: 40px; }
+        
+        header { position: fixed; top: 0; left: 0; width: 100%; height: 70px; background: rgba(255,255,255,0.9); backdrop-filter: blur(10px); z-index: 1000; display: flex; align-items: center; padding: 0 20px; justify-content: space-between; border-bottom: 1px solid rgba(0,0,0,0.05); }
+        .menu-btn { font-size: 1.4rem; color: var(--text-main); cursor: pointer; background: #F5F6FA; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 10px; }
+        .header-title { font-weight: 700; font-size: 1.2rem; color: var(--text-main); }
+
+        #side-menu { position: fixed; top: 0; left: 0; width: 280px; height: 100%; background: var(--sidebar-bg); z-index: 1500; transform: translateX(-100%); transition: transform 0.4s; display: flex; flex-direction: column; border-radius: 0 25px 25px 0; overflow: hidden; }
+        #side-menu.active { transform: translateX(0); }
+        .menu-header { padding: 40px 25px 20px; background: linear-gradient(135deg, #8A2BE2 0%, #6C63FF 100%); color: white; font-size: 1.5rem; font-weight: 800; display: flex; flex-direction: column; justify-content: flex-end; height: 160px; }
+        .menu-content { overflow-y: auto; padding: 15px; flex: 1; }
+        .menu-item { padding: 14px 18px; margin-bottom: 8px; border-radius: 12px; cursor: pointer; color: rgba(255,255,255,0.7); display: flex; align-items: center; gap: 15px; transition: 0.2s; font-weight: 500; }
+        .menu-item:hover { background: rgba(255,255,255,0.05); color: white; }
+        .menu-item.active-link { background: #6C63FF; color: white; }
+        .menu-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.2); backdrop-filter: blur(3px); z-index: 1400; opacity: 0; pointer-events: none; transition: 0.3s; }
+        .menu-overlay.active { opacity: 1; pointer-events: auto; }
+
+        .section { display: none; padding: 20px; animation: slideUp 0.4s; }
+        .section.active { display: block; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .stat-card { background: white; padding: 20px; border-radius: 18px; text-align: center; border: 1px solid #f0f0f0; box-shadow: var(--shadow); position: relative; overflow: hidden; }
+        .stat-card::before { content:''; position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: var(--primary-grad); }
+        .stat-val { font-size: 1.8rem; font-weight: 800; color: #2D3436; margin-top: 8px; }
+        .stat-label { font-size: 0.85rem; color: #888; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
+
+        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); z-index: 3000; display: none; align-items: center; justify-content: center; padding: 20px; }
+        .modal-content { background: white; width: 100%; max-width: 500px; border-radius: 24px; padding: 30px; max-height: 90vh; overflow-y: auto; animation: modalIn 0.3s forwards; }
+        @keyframes modalIn { to { transform: translateY(0); } }
+        
+        .list-item-img { width: 50px; height: 50px; border-radius: 12px; object-fit: cover; margin-right: 15px; }
+        .badge { font-size: 0.7rem; background: rgba(108, 99, 255, 0.1); color: var(--primary); padding: 4px 10px; border-radius: 6px; font-weight: 700; display: inline-block; }
+
+        .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #2D3436; color: white; padding: 12px 24px; border-radius: 50px; z-index: 5000; display: none; font-weight: 500; }
+        .maintenance-card { background: linear-gradient(135deg, #fff0f0 0%, #ffe0e0 100%); border-left: 5px solid #FF6B6B; }
+        .update-card { background: linear-gradient(135deg, #f0f4ff 0%, #e8eeff 100%); border-left: 5px solid var(--primary); }
+        .toggle-switch { position: relative; display: inline-block; width: 52px; height: 26px; }
+        .toggle-switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: 0.3s; border-radius: 34px; }
+        .slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 3px; bottom: 3px; background-color: white; transition: 0.3s; border-radius: 50%; }
+        input:checked + .slider { background-color: #FF6B6B; }
+        input:checked + .slider:before { transform: translateX(26px); }
+
+        .rating-star { color: #FFD700; font-size: 0.9rem; }
+        .popular-course-item { background: #f5f5f5; padding: 12px; border-radius: 12px; margin-bottom: 10px; }
+        .popular-course-item .course-name { font-weight: 600; }
+        .popular-course-item .purchase-count { color: #FF6B6B; font-weight: 700; }
+        .message-badge { background: #FF6B6B; color: white; border-radius: 20px; padding: 2px 8px; font-size: 0.7rem; margin-left: 10px; }
+        
+        /* Manual Payment Request Card - Smooth & Clean */
+        .payment-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 15px;
+            border: 1px solid #eef2f6;
+            transition: all 0.2s ease;
+        }
+        .payment-card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+        .payment-user {
+            font-weight: 600;
+            font-size: 1rem;
+            color: var(--text-main);
+        }
+        .payment-email {
+            font-size: 0.75rem;
+            color: #888;
+            margin-top: 2px;
+        }
+        .payment-amount {
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: var(--primary);
+        }
+        .payment-status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+        .status-pending {
+            background: #fef3c7;
+            color: #d97706;
+        }
+        .status-approved {
+            background: #d1fae5;
+            color: #059669;
+        }
+        .status-rejected {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+        .view-link {
+            color: var(--primary);
+            font-size: 0.75rem;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+        .action-btn {
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: 0.2s;
+        }
+        .action-approve {
+            background: #10b981;
+            color: white;
+        }
+        .action-approve:hover {
+            background: #059669;
+        }
+        .action-reject {
+            background: #ef4444;
+            color: white;
+        }
+        .action-reject:hover {
+            background: #dc2626;
+        }
+        .action-delete {
+            background: #6b7280;
+            color: white;
+        }
+        .action-delete:hover {
+            background: #4b5563;
+        }
+        .payment-time {
+            font-size: 0.7rem;
+            color: #aaa;
+            margin-top: 8px;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="loader"><div class="spinner"></div></div>
+    <div id="toast" class="toast"></div>
+
+    <div id="auth-screen">
+        <div class="auth-card">
+            <div class="auth-logo"><i class="fas fa-cube"></i></div>
+            <h2 style="font-weight: 800; margin-bottom: 5px; font-size: 1.8rem;">Admin Portal</h2>
+            <p style="color: #888; margin-bottom: 30px;">Manage your content efficiently</p>
+            <div class="input-group" style="text-align: left;">
+                <label>Email Address</label>
+                <input id="l-email" type="email" placeholder="admin@master.com">
+            </div>
+            <div class="input-group" style="text-align: left;">
+                <label>Password</label>
+                <input id="l-pass" type="password" placeholder="••••••••">
+            </div>
+            <button class="btn btn-primary" onclick="handleLogin()">Sign In Dashboard</button>
+        </div>
+    </div>
+
+    <div id="app-container">
+        <header>
+            <div class="menu-btn" onclick="toggleMenu()"><i class="fas fa-bars"></i></div>
+            <img id="header-logo-admin" style="width:30px; height:30px; border-radius:8px; display:none; object-fit:cover; margin-right:10px;">
+            <div style="flex:1;"><span class="header-title" id="page-title">Dashboard</span></div>
+        </header>
+
+        <div class="menu-overlay" onclick="toggleMenu()"></div>
+        <div id="side-menu">
+            <div class="menu-header">
+                <i class="fas fa-layer-group" style="margin-bottom:10px; font-size: 2rem; opacity: 0.8;"></i>
+                <span id="admin-brand-name">App Master</span>
+            </div>
+            <div class="menu-content">
+                <div class="menu-item active-link" onclick="nav('dashboard')"><i class="fas fa-home"></i> Dashboard</div>
+                <div class="menu-item" onclick="nav('app-controls')"><i class="fas fa-mobile-alt"></i> App Control</div>
+                <div class="menu-item" onclick="nav('maintenance')"><i class="fas fa-tools"></i> Maintenance & Updates</div>
+                <div class="menu-item" onclick="nav('courses')"><i class="fas fa-book"></i> Courses</div>
+                <div class="menu-item" onclick="nav('categories')"><i class="fas fa-tags"></i> Categories</div>
+                <div class="menu-item" onclick="nav('slider')"><i class="fas fa-images"></i> Banners</div>
+                <div class="menu-item" onclick="nav('live')"><i class="fas fa-video"></i> Live Stream</div>
+                <div class="menu-item" onclick="nav('payments')"><i class="fas fa-wallet"></i> Payments</div>
+                <div class="menu-item" onclick="nav('notifications')"><i class="fas fa-bell"></i> Push Notify</div>
+                <div class="menu-item" onclick="nav('messages')"><i class="fas fa-envelope"></i> Direct Messages</div>
+                <div class="menu-item" onclick="nav('popular')"><i class="fas fa-chart-line"></i> Popular Courses</div>
+                <div class="menu-item" onclick="nav('ratings')"><i class="fas fa-star"></i> Ratings & Reviews</div>
+                <div class="menu-item" onclick="nav('manual-payments')"><i class="fas fa-hand-holding-usd"></i> Manual Payments</div>
+                <div class="menu-item" onclick="nav('settings')"><i class="fas fa-credit-card"></i> Pay Settings</div>
+                <div class="menu-item" onclick="nav('app-manager')"><i class="fas fa-box"></i> App Manager</div>
+                <div style="height: 20px;"></div>
+                <div class="menu-item" onclick="logout()" style="color:#ff6b6b"><i class="fas fa-sign-out-alt"></i> Logout</div>
+            </div>
+        </div>
+
+        <!-- DASHBOARD -->
+        <div id="sec-dashboard" class="section active">
+            <h2 style="margin-bottom:20px;">Overview</h2>
+            <div class="stats-grid">
+                <div class="stat-card"><div class="stat-label">Total Users</div><div class="stat-val" id="st-users">0</div></div>
+                <div class="stat-card"><div class="stat-label">Active Courses</div><div class="stat-val" id="st-courses">0</div></div>
+                <div class="stat-card" style="grid-column:span 2; background: linear-gradient(135deg, #6C63FF, #8A2BE2); color:white; border:none;">
+                    <div class="stat-label" style="color:rgba(255,255,255,0.7);">Total Revenue</div>
+                    <div class="stat-val" style="color:white;" id="st-rev">$0</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- APP CONTROLS -->
+        <div id="sec-app-controls" class="section">
+            <div class="card">
+                <h3><i class="fas fa-palette"></i> Branding</h3><br>
+                <div class="input-group"><label>App Name</label><input id="app-name"></div>
+                <div class="input-group">
+                    <label>Logo URL</label>
+                    <div class="img-upload-wrapper">
+                        <input id="app-logo" placeholder="Image URL or Upload">
+                        <input type="file" id="app-logo-file" accept="image/*" style="display:none;" onchange="uploadToImgBB(this, 'app-logo')">
+                        <button class="btn-outline img-upload-btn" onclick="document.getElementById('app-logo-file').click()"><i class="fas fa-cloud-upload-alt"></i> Upload</button>
+                    </div>
+                    <img id="app-logo-preview" class="img-preview">
+                </div>
+                <div class="input-group"><label>Support Link</label><input id="app-support"></div>
+                <div class="input-group"><label>Privacy Policy</label><textarea id="app-policy" rows="5"></textarea></div>
+                <button class="btn btn-primary" onclick="saveAppSets()">Save Configuration</button>
+            </div>
+        </div>
+
+        <!-- MAINTENANCE & UPDATES -->
+        <div id="sec-maintenance" class="section">
+            <div class="card maintenance-card">
+                <h3><i class="fas fa-tools"></i> Maintenance Mode</h3><br>
+                <div class="flex-row" style="margin-bottom:15px;">
+                    <span style="font-weight:600;">Enable Maintenance Mode</span>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="maintenance-toggle" onchange="toggleMaintenance()">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div class="input-group"><label>Maintenance Message</label><textarea id="maintenance-message" rows="3"></textarea></div>
+                <button class="btn btn-primary" onclick="saveMaintenanceSettings()">Save Maintenance Settings</button>
+                <p style="font-size:0.75rem; color:#888; margin-top:10px;"><i class="fas fa-info-circle"></i> Admin emails bypass maintenance mode</p>
+            </div>
+            <div class="card update-card">
+                <h3><i class="fas fa-download"></i> Force Update System</h3><br>
+                <div class="input-group"><label>Minimum Version Required</label><input type="text" id="min-version" placeholder="e.g., 1.2.0"></div>
+                <div class="input-group"><label>Update Link</label><input type="url" id="update-link" placeholder="https://play.google.com/store/apps/details?id=your.app.id"></div>
+                <button class="btn btn-primary" onclick="saveUpdateSettings()">Save Update Settings</button>
+            </div>
+            <div class="card">
+                <h3><i class="fas fa-tag"></i> Coupon Management</h3><br>
+                <div class="input-group"><label>Coupon Code</label><input id="coupon-code" placeholder="e.g., FLAT50"></div>
+                <div class="input-group"><label>Discount Type</label><select id="coupon-type"><option value="percentage">Percentage (%)</option><option value="flat">Flat (₹)</option></select></div>
+                <div class="input-group"><label>Discount Value</label><input id="coupon-value" type="number" placeholder="10 for 10% or 100 for ₹100"></div>
+                <div class="input-group"><label>Valid Till (Optional)</label><input id="coupon-expiry" type="date"></div>
+                <div class="flex-row"><button class="btn btn-primary" style="width:48%;" onclick="saveCoupon()">Create Coupon</button><button class="btn-outline" style="width:48%;" onclick="loadCoupons()">Refresh List</button></div>
+                <div id="coupons-list" style="margin-top:20px;"></div>
+            </div>
+            <div class="card">
+                <h3><i class="fas fa-image"></i> Popup Offer (App Open)</h3><br>
+                <div class="input-group"><label>Offer Image URL</label><div class="img-upload-wrapper"><input id="offer-img" placeholder="Image URL or Upload"><input type="file" id="offer-img-file" accept="image/*" style="display:none;" onchange="uploadToImgBB(this, 'offer-img')"><button class="btn-outline img-upload-btn" onclick="document.getElementById('offer-img-file').click()"><i class="fas fa-cloud-upload-alt"></i> Upload</button></div><img id="offer-img-preview" class="img-preview"></div>
+                <div class="input-group"><label>Offer Title</label><input id="offer-title" placeholder="e.g., Special Diwali Offer!"></div>
+                <div class="input-group"><label>Offer Description</label><textarea id="offer-desc" rows="2"></textarea></div>
+                <div class="input-group"><label>Button Link (Optional)</label><input id="offer-link" placeholder="https://yourstore.com/offer"></div>
+                <div class="input-group"><label>Show/Hide Offer</label><select id="offer-status"><option value="ON">Show to Users</option><option value="OFF">Hide</option></select></div>
+                <button class="btn btn-primary" onclick="saveOfferSettings()">Save Offer Settings</button>
+            </div>
+        </div>
+
+        <!-- NOTIFICATIONS -->
+       <div id="sec-notifications" class="section">
+    <div class="card">
+        <h3><i class="fas fa-paper-plane"></i> Send Push Notification</h3><br>
+        
+        <div class="input-group">
+            <label>Title</label>
+            <input id="push-title" placeholder="New Course Alert!">
+        </div>
+        
+        <div class="input-group">
+            <label>Message</label>
+            <textarea id="push-msg" rows="3" placeholder="Enroll now!"></textarea>
+        </div>
+        
+        <div class="input-group">
+            <label>Click Link (Optional)</label>
+            <input id="push-link" placeholder="https://yourapp.com/course123">
+        </div>
+        
+        <button class="btn btn-primary" onclick="sendPushNotification()">
+            <i class="fas fa-paper-plane"></i> Send to All Users
+        </button>
+    </div>
+</div>
+        
+<!-- ========== APP MANAGER SECTION (NEW) ========== -->
+<div id="sec-app-manager" class="section">
+    <div class="flex-row" style="margin-bottom:15px;">
+        <h3><i class="fas fa-box"></i> App Manager</h3>
+        <button class="btn btn-primary" style="width:auto; padding:10px 20px;" onclick="openAddAppModal()">
+            <i class="fas fa-plus"></i> Add App
+        </button>
+    </div>
+    <p style="color:#888; margin-bottom:15px; font-size:0.8rem;">
+        Manage apps that users can download from the Apps Store.
+    </p>
+    <div id="list-apps"></div>
+</div>
+
+<!-- ========== ADD/EDIT APP MODAL ========== -->
+<div id="modal-app" class="modal">
+    <div class="modal-content">
+        <h3 id="app-modal-title"><i class="fas fa-mobile-alt"></i> Add New App</h3><br>
+        <input type="hidden" id="edit-app-id">
+        
+        <div class="input-group">
+            <label>App Name</label>
+            <input id="app-mgr-name" placeholder="e.g., BGMI Mod Menu">
+        </div>
+        
+        <div class="input-group">
+            <label>Category</label>
+            <select id="app-mgr-category">
+                <option value="Games">Games</option>
+                <option value="Tools">Tools</option>
+                <option value="Mods">Mods</option>
+                <option value="Premium">Premium</option>
+            </select>
+        </div>
+        
+        <div class="flex-row" style="gap:10px;">
+            <div class="input-group" style="flex:1;">
+                <label>Size (e.g., 45 MB)</label>
+                <input id="app-mgr-size" placeholder="45 MB">
+            </div>
+            <div class="input-group" style="flex:1;">
+                <label>Version</label>
+                <input id="app-mgr-version" placeholder="2.5">
+            </div>
+        </div>
+        
+   <div class="input-group">
+    <label>App Icon</label>
+    <div class="img-upload-wrapper">
+        <input id="app-mgr-icon" placeholder="Icon URL or Emoji (e.g., 🎮)">
+        <input type="file" id="app-icon-file" accept="image/*" style="display:none;" onchange="uploadAppIcon(this)">
+        <button class="btn-outline img-upload-btn" onclick="document.getElementById('app-icon-file').click()">
+            <i class="fas fa-cloud-upload-alt"></i> Upload Icon
+        </button>
+    </div>
+    <img id="app-icon-preview" class="img-preview" style="width:80px; height:80px; border-radius:16px; margin:10px auto;">
+    <small style="color:#888;">EMOJI for text icon ya IMAGE URL for photo icon</small>
+</div>
+        
+        <div class="input-group">
+            <label>Description</label>
+            <textarea id="app-mgr-desc" rows="2" placeholder="Unlimited UC, AimBot, Wall Hack"></textarea>
+        </div>
+        
+        <div class="flex-row" style="gap:10px;">
+            <div class="input-group" style="flex:1;">
+                <label>Free with Ad?</label>
+                <select id="app-mgr-freeWithAd">
+                    <option value="true">Yes (Free)</option>
+                    <option value="false">No (Premium)</option>
+                </select>
+            </div>
+            <div class="input-group" style="flex:1;">
+                <label>Premium Price (₹)</label>
+                <input id="app-mgr-price" type="number" value="0" placeholder="49">
+            </div>
+        </div>
+        
+        <div class="input-group">
+            <label>Download URL (Direct Link)</label>
+            <input id="app-mgr-url" placeholder="https://example.com/app.apk">
+        </div>
+        
+        <div class="input-group">
+            <label>Upload APK File (For Android Storage)</label>
+            <input type="file" id="app-mgr-file" accept=".apk,.zip,.rar" style="display:none;" onchange="handleAppFileUpload(this)">
+            <button class="btn-outline" style="width:auto; padding:10px 20px;" onclick="document.getElementById('app-mgr-file').click()">
+                <i class="fas fa-cloud-upload-alt"></i> Choose APK File
+            </button>
+            <span id="app-file-name" style="margin-left:10px; font-size:0.8rem; color:#888;"></span>
+        </div>
+        
+        <div class="flex-row" style="gap:10px; margin-top:20px;">
+            <button class="btn btn-primary" onclick="saveApp()">Save App</button>
+            <button class="btn btn-outline" onclick="closeModal('modal-app')">Close</button>
+        </div>
+    </div>
+</div>
+
+        <!-- DIRECT MESSAGES -->
+        <div id="sec-messages" class="section">
+            <div class="card">
+                <h3><i class="fas fa-envelope"></i> Send Direct Message to User</h3><br>
+                <div class="input-group"><label>User Email</label><input id="dm-email" placeholder="user@example.com"></div>
+                <div class="input-group"><label>Message</label><textarea id="dm-msg" rows="3" placeholder="Write your message here..."></textarea></div>
+                <button class="btn btn-primary" onclick="sendDirectMessage()">Send Message</button>
+            </div>
+            <div class="card">
+                <h3><i class="fas fa-history"></i> Recent Messages Sent</h3>
+                <div id="sent-messages-list"></div>
+            </div>
+        </div>
+
+        <!-- POPULAR COURSES -->
+        <div id="sec-popular" class="section">
+            <div class="card">
+                <h3><i class="fas fa-chart-line"></i> Most Popular Courses</h3>
+                <div id="popular-courses-list"></div>
+            </div>
+        </div>
+
+        <!-- RATINGS & REVIEWS -->
+        <div id="sec-ratings" class="section">
+            <div class="card">
+                <h3><i class="fas fa-star"></i> All User Ratings & Reviews</h3>
+                <div id="all-ratings-list"></div>
+            </div>
+        </div>
+
+        <!-- MANUAL PAYMENTS (IMPROVED - SMOOTH) -->
+        <div id="sec-manual-payments" class="section">
+            <div class="card">
+                <h3><i class="fas fa-hand-holding-usd"></i> Manual Payment Requests</h3>
+                <p style="color:#888; margin-bottom:15px; font-size:0.8rem;">Users who submitted manual payment requests. Approve to add money to their wallet.</p>
+                <div id="manual-payments-list"></div>
+            </div>
+        </div>
+
+        <!-- COURSES -->
+        <div id="sec-courses" class="section">
+            <div class="flex-row" style="margin-bottom:15px;"><h3>Courses</h3><button class="btn btn-primary" style="width:auto; padding:10px 20px;" onclick="openAddCourseModal()"><i class="fas fa-plus"></i> Add</button></div>
+            <div id="list-courses"></div>
+        </div>
+
+        <!-- CATEGORIES -->
+        <div id="sec-categories" class="section">
+            <div class="card"><h3>New Category</h3><div class="input-group" style="margin-top:10px;"><input id="cat-name" placeholder="Category Name"></div><button class="btn btn-primary" onclick="saveCat()">Create Category</button></div>
+            <h4 style="margin:20px 0 10px;">Existing Categories</h4><div id="list-cats"></div>
+        </div>
+
+        <!-- LIVE -->
+        <div id="sec-live" class="section">
+            <div class="card"><h3><i class="fas fa-broadcast-tower"></i> Live Session Control</h3><br><div class="input-group"><label>Session Title</label><input id="l-desc"></div><div class="input-group"><label>Meeting Link</label><input id="l-link"></div><div class="input-group"><label>Price ($0 for Free)</label><input type="number" id="l-price" value="0"></div><div class="input-group"><label>Session Status</label><select id="l-stat"><option value="OFF">Ended / Offline</option><option value="ON">LIVE NOW</option></select></div><button class="btn btn-primary" onclick="saveLive()">Update Status</button></div>
+        </div>
+
+        <!-- SLIDER -->
+        <div id="sec-slider" class="section">
+            <button class="btn btn-primary" onclick="openModal('modal-promo')">+ Add Banner Slide</button>
+            <div id="list-promo" style="margin-top:20px"></div>
+        </div>
+
+        <!-- PAYMENTS -->
+        <div id="sec-payments" class="section">
+            <div id="list-payments"></div>
+        </div>
+
+        <!-- SETTINGS -->
+        <div id="sec-settings" class="section">
+            <div class="card"><h3>Payment Methods</h3><br><div class="input-group"><label>UPI ID (e.g. name@bank)</label><input id="set-upi"></div><div class="input-group"><label>QR Code Image URL</label><div class="img-upload-wrapper"><input id="set-qr" placeholder="QR Code URL or Upload"><input type="file" id="qr-file" accept="image/*" style="display:none;" onchange="uploadToImgBB(this, 'set-qr')"><button class="btn-outline img-upload-btn" onclick="document.getElementById('qr-file').click()"><i class="fas fa-cloud-upload-alt"></i> Upload</button></div><img id="set-qr-preview" class="img-preview"></div><button class="btn btn-primary" onclick="saveSets()">Save Payment Info</button></div>
+        </div>
+    </div>
+
+    <!-- COURSE MODAL -->
+    <div id="modal-course" class="modal"><div class="modal-content"><h3 id="course-modal-title">Course Details</h3><br><input type="hidden" id="edit-course-id"><div class="input-group"><label>Title</label><input id="c-title"></div><div class="input-group"><label>Category</label><select id="c-cat"></select></div><div class="input-group"><label>Price (₹)</label><input id="c-price" type="number"></div><div class="input-group"><label>Description</label><textarea id="c-desc" rows="2"></textarea></div><div class="input-group"><label>Cover Image URL</label><div class="img-upload-wrapper"><input id="c-img" placeholder="Image URL or Upload"><input type="file" id="c-img-file" accept="image/*" style="display:none;" onchange="uploadToImgBB(this, 'c-img')"><button class="btn-outline img-upload-btn" onclick="document.getElementById('c-img-file').click()"><i class="fas fa-cloud-upload-alt"></i> Upload</button></div><img id="c-img-preview" class="img-preview"></div><div class="input-group"><label>Video Link (YouTube/MP4)</label><input id="c-vid"></div><div class="input-group"><label>Notes Link (PDF/Drive)</label><input id="c-note"></div><div class="flex-row" style="gap:10px; margin-top:20px;"><button class="btn btn-primary" onclick="saveCourse()">Save Course</button><button class="btn btn-outline" onclick="closeModal('modal-course')">Close</button></div></div></div>
+
+    <!-- PROMO MODAL -->
+    <div id="modal-promo" class="modal"><div class="modal-content"><h3>New Banner</h3><br><div class="input-group"><label>Image URL</label><div class="img-upload-wrapper"><input id="p-img" placeholder="Image URL or Upload"><input type="file" id="p-img-file" accept="image/*" style="display:none;" onchange="uploadToImgBB(this, 'p-img')"><button class="btn-outline img-upload-btn" onclick="document.getElementById('p-img-file').click()"><i class="fas fa-cloud-upload-alt"></i> Upload</button></div><img id="p-img-preview" class="img-preview"></div><div class="input-group"><label>Tap Link (Optional)</label><input id="p-link"></div><div class="flex-row" style="gap:10px; margin-top:20px;"><button class="btn btn-primary" onclick="savePromo()">Add Banner</button><button class="btn btn-outline" onclick="closeModal('modal-promo')">Close</button></div></div></div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyASeoEoE8TG3yoBxjO7TaVrM_ZNZnUCvLc",
+            authDomain: "cric-falshfire.firebaseapp.com",
+            databaseURL: "https://cric-falshfire-default-rtdb.firebaseio.com",
+            projectId: "cric-falshfire",
+            storageBucket: "cric-falshfire.firebasestorage.app",
+            messagingSenderId: "973337900409",
+            appId: "1:973337900409:web:b055fd693849c5baeb6ba8"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.database();
+        let allCats = {};
+        let editingCourseId = null;
+        const IMGBB_API_KEY = '857e465969b8fa1cbe2fe926555fb08d';
+
+        async function uploadToImgBB(fileInput, targetInputId) {
+            const file = fileInput.files[0];
+            if (!file) return;
+            const targetInput = document.getElementById(targetInputId);
+            const previewImg = document.getElementById(targetInputId + '-preview');
+            targetInput.value = 'Uploading...';
+            showToast('Uploading image...');
+            const formData = new FormData();
+            formData.append('image', file);
+            try {
+                const response = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, { method: 'POST', body: formData });
+                const data = await response.json();
+                if (data.success) {
+                    const url = data.data.url;
+                    targetInput.value = url;
+                    if (previewImg) { previewImg.src = url; previewImg.style.display = 'block'; }
+                    showToast('Image uploaded successfully!');
+                } else { showToast('Upload failed'); targetInput.value = ''; }
+            } catch (error) { showToast('Upload error'); targetInput.value = ''; }
+            fileInput.value = '';
+        }
+
+        function updatePreviewFromUrl(inputId) {
+            const input = document.getElementById(inputId);
+            const preview = document.getElementById(inputId + '-preview');
+            if (input && preview && input.value && (input.value.startsWith('http') || input.value.startsWith('https'))) {
+                preview.src = input.value; preview.style.display = 'block';
+            } else if (preview) { preview.style.display = 'none'; }
+        }
+
+        function attachUrlPreviewListeners() {
+            ['app-logo', 'set-qr', 'c-img', 'p-img', 'offer-img'].forEach(id => {
+                const input = document.getElementById(id);
+                if (input) {
+                    input.addEventListener('input', () => updatePreviewFromUrl(id));
+                    input.addEventListener('blur', () => updatePreviewFromUrl(id));
+                }
+            });
+        }
+
+        function loadMaintenanceSettings() {
+            db.ref('appConfig').on('value', snapshot => {
+                const config = snapshot.val() || {};
+                document.getElementById('maintenance-toggle').checked = config.maintenance || false;
+                document.getElementById('maintenance-message').value = config.maintenanceMessage || "We're currently updating our app. Please check back soon!";
+                document.getElementById('min-version').value = config.minVersion || "1.0.0";
+                document.getElementById('update-link').value = config.updateLink || "";
+            });
+        }
+
+        function toggleMaintenance() { showToast(`Maintenance mode will be ${document.getElementById('maintenance-toggle').checked ? 'ON' : 'OFF'}. Click Save to confirm.`); }
+        function saveMaintenanceSettings() {
+            db.ref('appConfig').update({ maintenance: document.getElementById('maintenance-toggle').checked, maintenanceMessage: document.getElementById('maintenance-message').value, lastUpdated: Date.now() })
+                .then(() => showToast('Maintenance settings saved!'));
+        }
+        function saveUpdateSettings() {
+            db.ref('appConfig').update({ minVersion: document.getElementById('min-version').value, updateLink: document.getElementById('update-link').value })
+                .then(() => showToast('Update settings saved!'));
+        }
+
+        function saveOfferSettings() {
+            db.ref('offerSettings').set({
+                image: document.getElementById('offer-img').value,
+                title: document.getElementById('offer-title').value,
+                description: document.getElementById('offer-desc').value,
+                link: document.getElementById('offer-link').value,
+                status: document.getElementById('offer-status').value,
+                lastUpdated: Date.now()
+            }).then(() => showToast('Offer settings saved!'));
+        }
+
+        function loadOfferSettings() {
+            db.ref('offerSettings').on('value', s => {
+                const v = s.val() || {};
+                document.getElementById('offer-img').value = v.image || '';
+                document.getElementById('offer-title').value = v.title || '';
+                document.getElementById('offer-desc').value = v.description || '';
+                document.getElementById('offer-link').value = v.link || '';
+                document.getElementById('offer-status').value = v.status || 'OFF';
+                if(v.image) { const p = document.getElementById('offer-img-preview'); if(p) { p.src = v.image; p.style.display = 'block'; } }
+            });
+        }
+
+        function saveCoupon() {
+            const code = document.getElementById('coupon-code').value.toUpperCase();
+            if (!code) return showToast('Enter coupon code');
+            db.ref('coupons/' + code).set({
+                type: document.getElementById('coupon-type').value,
+                value: parseInt(document.getElementById('coupon-value').value),
+                expiry: document.getElementById('coupon-expiry').value,
+                createdAt: Date.now()
+            }).then(() => { showToast('Coupon created!'); document.getElementById('coupon-code').value = ''; document.getElementById('coupon-value').value = ''; loadCoupons(); });
+        }
+
+        function loadCoupons() {
+            db.ref('coupons').on('value', s => {
+                const container = document.getElementById('coupons-list');
+                if (!container) return;
+                container.innerHTML = '<h4>Active Coupons</h4>';
+                s.forEach(c => {
+                    const val = c.val();
+                    container.innerHTML += `<div class="flex-row" style="background:#f5f5f5; padding:10px; border-radius:12px; margin-bottom:8px;"><div><b>${c.key}</b><br><small>${val.type === 'percentage' ? val.value + '% off' : '₹' + val.value + ' off'}</small></div><button class="btn-danger" style="width:auto; padding:5px 12px;" onclick="db.ref('coupons/${c.key}').remove()">Delete</button></div>`;
+                });
+                if(s.numChildren() === 0) container.innerHTML += '<p style="color:#888;">No coupons yet</p>';
+            });
+        }
+
+        // ========== DIRECT MESSAGES ==========
+        function sendDirectMessage() {
+            const userEmail = document.getElementById('dm-email').value;
+            const message = document.getElementById('dm-msg').value;
+            if (!userEmail || !message) return showToast('Enter user email and message');
+            
+            db.ref('users').orderByChild('email').equalTo(userEmail).once('value', snapshot => {
+                if (!snapshot.exists()) return showToast('User not found!');
+                let userId = null;
+                snapshot.forEach(user => { userId = user.key; });
+                if (userId) {
+                    db.ref('messages/' + userId).push({
+                        message: message,
+                        timestamp: Date.now(),
+                        read: false,
+                        fromAdmin: true
+                    }).then(() => {
+                        showToast('Message sent to user!');
+                        document.getElementById('dm-email').value = '';
+                        document.getElementById('dm-msg').value = '';
+                        loadSentMessages();
+                    }).catch(err => showToast('Error: ' + err.message));
+                }
+            });
+        }
+
+        function loadSentMessages() {
+            db.ref('messages').limitToLast(20).once('value', snapshot => {
+                const container = document.getElementById('sent-messages-list');
+                if (!container) return;
+                container.innerHTML = '';
+                const messages = [];
+                snapshot.forEach(userMsg => {
+                    const userId = userMsg.key;
+                    userMsg.forEach(msg => {
+                        messages.unshift({ userId, ...msg.val(), msgId: msg.key });
+                    });
+                });
+                messages.slice(0, 20).forEach(msg => {
+                    container.innerHTML += `<div class="flex-row" style="background:#f5f5f5; padding:12px; border-radius:12px; margin-bottom:8px;"><div><strong>User ID:</strong> ${msg.userId.substring(0,10)}...<br><strong>Message:</strong> ${msg.message}<br><small>${new Date(msg.timestamp).toLocaleString()}</small></div></div>`;
+                });
+                if (container.innerHTML === '') container.innerHTML = '<p style="color:#888;">No messages sent yet</p>';
+            });
+        }
+
+        // ========== POPULAR COURSES ==========
+        function loadPopularCourses() {
+            db.ref('users').once('value', usersSnap => {
+                const coursePurchaseCount = {};
+                usersSnap.forEach(u => {
+                    if (u.val().courses) {
+                        Object.keys(u.val().courses).forEach(courseId => {
+                            coursePurchaseCount[courseId] = (coursePurchaseCount[courseId] || 0) + 1;
+                        });
+                    }
+                });
+                const container = document.getElementById('popular-courses-list');
+                if (!container) return;
+                container.innerHTML = '';
+                const sorted = Object.entries(coursePurchaseCount).sort((a,b) => b[1] - a[1]);
+                if (sorted.length === 0) {
+                    container.innerHTML = '<p style="color:#888;">No course purchases yet</p>';
+                    return;
+                }
+                sorted.forEach(([courseId, count]) => {
+                    db.ref('courses/' + courseId).once('value', courseSnap => {
+                        const course = courseSnap.val();
+                        const courseName = course ? course.title : 'Unknown Course';
+                        container.innerHTML += `<div class="popular-course-item flex-row"><div class="course-name">${courseName}</div><div class="purchase-count">${count} purchases</div></div>`;
+                    });
+                });
+            });
+        }
+
+        // ========== RATINGS & REVIEWS ==========
+        function loadAllRatings() {
+            db.ref('ratings').once('value', snapshot => {
+                const container = document.getElementById('all-ratings-list');
+                if (!container) return;
+                container.innerHTML = '';
+                const allRatings = [];
+                snapshot.forEach(courseRatings => {
+                    const courseId = courseRatings.key;
+                    courseRatings.forEach(rating => {
+                        allRatings.unshift({ courseId, ...rating.val(), ratingId: rating.key });
+                    });
+                });
+                if (allRatings.length === 0) {
+                    container.innerHTML = '<p style="color:#888;">No ratings yet</p>';
+                    return;
+                }
+                allRatings.forEach(r => {
+                    const stars = '★'.repeat(r.rating) + '☆'.repeat(5 - r.rating);
+                    container.innerHTML += `<div class="card" style="margin-bottom:10px;"><div class="flex-row"><div><strong>${r.userName}</strong><div class="rating-star">${stars}</div><div>${r.review || 'No review text'}</div><small>${new Date(r.timestamp).toLocaleString()}</small></div></div></div>`;
+                });
+            });
+        }
+
+        // ========== MANUAL PAYMENTS (IMPROVED - SMOOTH) ==========
+        function loadManualPayments() {
+            db.ref('manual_payments').orderByChild('timestamp').once('value', snapshot => {
+                const container = document.getElementById('manual-payments-list');
+                if (!container) return;
+                container.innerHTML = '';
+                
+                const pendingPayments = [];
+                const approvedRejected = [];
+                
+                snapshot.forEach(p => {
+                    const payment = { id: p.key, ...p.val() };
+                    if (payment.status === 'PENDING') {
+                        pendingPayments.unshift(payment);
+                    } else {
+                        approvedRejected.unshift(payment);
+                    }
+                });
+                
+                // Show Pending first
+                if (pendingPayments.length > 0) {
+                    container.innerHTML += `<h4 style="margin:15px 0 10px; color:#d97706;">Pending Requests</h4>`;
+                    pendingPayments.forEach(p => {
+                        container.innerHTML += getPaymentCardHTML(p, true);
+                    });
+                }
+                
+                // Show Approved/Rejected
+                if (approvedRejected.length > 0) {
+                    container.innerHTML += `<h4 style="margin:15px 0 10px; color:#888;">Processed Requests</h4>`;
+                    approvedRejected.forEach(p => {
+                        container.innerHTML += getPaymentCardHTML(p, false);
+                    });
+                }
+                
+                if (pendingPayments.length === 0 && approvedRejected.length === 0) {
+                    container.innerHTML = '<p style="color:#888; text-align:center; padding:30px;">No manual payment requests yet</p>';
+                }
+            });
+        }
+        
+        function getPaymentCardHTML(payment, isPending) {
+            let statusClass = '';
+            let statusText = '';
+            if (payment.status === 'PENDING') {
+                statusClass = 'status-pending';
+                statusText = 'Pending';
+            } else if (payment.status === 'APPROVED') {
+                statusClass = 'status-approved';
+                statusText = 'Approved';
+            } else {
+                statusClass = 'status-rejected';
+                statusText = 'Rejected';
+            }
+            
+            let actionButtons = '';
+            if (isPending) {
+                actionButtons = `
+                    <div style="display:flex; gap:8px; margin-top:12px;">
+                        <button class="action-btn action-approve" onclick="approveManualPayment('${payment.id}', ${payment.amount})">Approve</button>
+                        <button class="action-btn action-reject" onclick="rejectManualPayment('${payment.id}')">Reject</button>
+                    </div>
+                `;
+            } else {
+                actionButtons = `
+                    <div style="margin-top:12px;">
+                        <button class="action-btn action-delete" onclick="deleteManualPayment('${payment.id}')">Delete</button>
+                    </div>
+                `;
+            }
+            
+            return `
+                <div class="payment-card">
+                    <div class="flex-row">
+                        <div>
+                            <div class="payment-user">${escapeHtml(payment.userName || 'User')}</div>
+                            <div class="payment-email">${escapeHtml(payment.userEmail || 'No email')}</div>
+                        </div>
+                        <div class="payment-amount">₹${payment.amount}</div>
+                    </div>
+                    <div class="flex-row" style="margin-top:8px;">
+                        <span class="payment-status ${statusClass}">${statusText}</span>
+                        <span class="view-link" onclick="window.open('${payment.screenshot}', '_blank')">View Screenshot</span>
+                    </div>
+                    <div class="payment-time">Submitted: ${new Date(payment.timestamp).toLocaleString()}</div>
+                    ${actionButtons}
+                </div>
+            `;
+        }
+        
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/[&<>]/g, function(m) {
+                if (m === '&') return '&amp;';
+                if (m === '<') return '&lt;';
+                if (m === '>') return '&gt;';
+                return m;
+            });
+        }
+
+        async function approveManualPayment(paymentId, amount) {
+            showToast('Processing...');
+            const paymentSnap = await db.ref('manual_payments/' + paymentId).once('value');
+            const payment = paymentSnap.val();
+            if (!payment) return showToast('Payment not found');
+            if (payment.status !== 'PENDING') return showToast('Already processed');
+            
+            const userRef = db.ref('users/' + payment.userId);
+            const userSnap = await userRef.once('value');
+            const currentWallet = userSnap.val()?.wallet || 0;
+            const newWallet = currentWallet + amount;
+            
+            await userRef.update({ wallet: newWallet });
+            await db.ref('users/' + payment.userId + '/transactions').push({
+                type: 'credit',
+                amount: amount,
+                description: 'Manual payment approved',
+                paymentMethod: 'Manual',
+                timestamp: Date.now()
+            });
+            await db.ref('manual_payments/' + paymentId).update({
+                status: 'APPROVED',
+                approvedAt: Date.now()
+            });
+            
+            showToast('Payment approved! Amount added to user wallet.');
+            loadManualPayments();
+        }
+
+        function rejectManualPayment(paymentId) {
+            if (!confirm('Reject this payment request?')) return;
+            db.ref('manual_payments/' + paymentId).update({
+                status: 'REJECTED',
+                rejectedAt: Date.now()
+            }).then(() => {
+                showToast('Payment request rejected.');
+                loadManualPayments();
+            });
+        }
+        
+        function deleteManualPayment(paymentId) {
+            if (!confirm('Delete this payment request permanently?')) return;
+            db.ref('manual_payments/' + paymentId).remove().then(() => {
+                showToast('Payment request deleted.');
+                loadManualPayments();
+            });
+        }
+
+        // ========== COURSE CRUD ==========
+        function openAddCourseModal() {
+            editingCourseId = null;
+            document.getElementById('course-modal-title').innerText = 'Add New Course';
+            document.getElementById('edit-course-id').value = '';
+            document.getElementById('c-title').value = '';
+            document.getElementById('c-price').value = '';
+            document.getElementById('c-desc').value = '';
+            document.getElementById('c-img').value = '';
+            document.getElementById('c-img-preview').style.display = 'none';
+            document.getElementById('c-vid').value = '';
+            document.getElementById('c-note').value = '';
+            fillCatSelect();
+            openModal('modal-course');
+        }
+
+        function editCourse(courseId, courseData) {
+            editingCourseId = courseId;
+            document.getElementById('course-modal-title').innerText = 'Edit Course';
+            document.getElementById('edit-course-id').value = courseId;
+            document.getElementById('c-title').value = courseData.title || '';
+            document.getElementById('c-price').value = courseData.price || '';
+            document.getElementById('c-desc').value = courseData.description || '';
+            document.getElementById('c-img').value = courseData.bannerUrl || '';
+            if(courseData.bannerUrl) {
+                const preview = document.getElementById('c-img-preview');
+                preview.src = courseData.bannerUrl;
+                preview.style.display = 'block';
+            }
+            document.getElementById('c-vid').value = courseData.videoUrl || '';
+            document.getElementById('c-note').value = courseData.notesUrl || '';
+            fillCatSelect(courseData.categoryId);
+            openModal('modal-course');
+        }
+
+        function saveCourse() {
+            const courseData = {
+                title: document.getElementById('c-title').value,
+                categoryId: document.getElementById('c-cat').value,
+                categoryName: allCats[document.getElementById('c-cat').value],
+                description: document.getElementById('c-desc').value,
+                price: document.getElementById('c-price').value,
+                bannerUrl: document.getElementById('c-img').value,
+                videoUrl: document.getElementById('c-vid').value,
+                notesUrl: document.getElementById('c-note').value,
+                lastUpdated: Date.now()
+            };
+            if (editingCourseId) {
+                db.ref('courses/' + editingCourseId).update(courseData).then(() => { showToast('Course Updated Successfully!'); closeModal('modal-course'); }).catch(err => showToast('Error: ' + err.message));
+            } else {
+                db.ref('courses').push(courseData).then(() => { showToast('Course Published Successfully!'); closeModal('modal-course'); document.getElementById('c-img').value = ''; document.getElementById('c-img-preview').style.display = 'none'; }).catch(err => showToast('Error: ' + err.message));
+            }
+        }
+
+        auth.onAuthStateChanged(user => {
+            document.getElementById('loader').style.display='none';
+            if(user) {
+                document.getElementById('auth-screen').style.display='none';
+                document.getElementById('app-container').style.display='block';
+                init();
+                attachUrlPreviewListeners();
+                loadMaintenanceSettings();
+                loadOfferSettings();
+                loadCoupons();
+                loadSentMessages();
+                loadPopularCourses();
+                loadAllRatings();
+                loadManualPayments();
+            } else {
+                document.getElementById('auth-screen').style.display='flex';
+                document.getElementById('app-container').style.display='none';
+            }
+        });
+
+        function handleLogin() {
+            document.getElementById('loader').style.display='flex';
+            auth.signInWithEmailAndPassword(document.getElementById('l-email').value, document.getElementById('l-pass').value)
+                .catch(err => { document.getElementById('loader').style.display='none'; showToast(err.message); });
+        }
+        function logout(){ auth.signOut(); }
+
+        function toggleMenu(){ document.getElementById('side-menu').classList.toggle('active'); document.querySelector('.menu-overlay').classList.toggle('active'); }
+        function nav(s){ 
+            toggleMenu(); 
+            document.querySelectorAll('.section').forEach(d=>d.classList.remove('active'));
+            document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active-link'));
+            document.querySelector(`.menu-item[onclick="nav('${s}')"]`)?.classList.add('active-link');
+            document.getElementById('sec-'+s).classList.add('active');
+            const map = {'dashboard':'Dashboard', 'app-controls':'App Controls', 'maintenance':'Maintenance & Updates', 'notifications':'Notifications', 'messages':'Direct Messages', 'popular':'Popular Courses', 'ratings':'Ratings & Reviews', 'manual-payments':'Manual Payments', 'courses':'Manage Courses', 'categories':'Categories', 'live':'Live Session', 'slider':'Banners', 'payments':'Payments', 'settings':'Pay Settings'};
+            document.getElementById('page-title').innerText = map[s]||'Admin';
+            if(s === 'popular') loadPopularCourses();
+            if(s === 'ratings') loadAllRatings();
+            if(s === 'messages') loadSentMessages();
+            if(s === 'manual-payments') loadManualPayments();
+        }
+        function openModal(id){ 
+            if(id==='modal-course') fillCatSelect(); 
+            document.getElementById(id).style.display='flex'; 
+            setTimeout(() => { if(id === 'modal-course') updatePreviewFromUrl('c-img'); if(id === 'modal-promo') updatePreviewFromUrl('p-img'); }, 50);
+        }
+        function closeModal(id){ document.getElementById(id).style.display='none'; editingCourseId = null; }
+        function showToast(m){ const t = document.getElementById('toast'); t.innerText=m; t.style.display='flex'; setTimeout(()=>t.style.display='none',3000); }
+
+        function init(){
+            db.ref('users').on('value', s=>document.getElementById('st-users').innerText=s.numChildren());
+            db.ref('courses').on('value', s=>document.getElementById('st-courses').innerText=s.numChildren());
+            db.ref('payments').on('value', s => {
+                let rev = 0; let pendingHTML = ''; const payList = document.getElementById('list-payments');
+                s.forEach(doc => {
+                    const p = doc.val();
+                    if(p.status === 'APPROVED') { rev += parseFloat(p.amount || 0); } 
+                    else if (p.status === 'PENDING') {
+                        pendingHTML += `<div class="card"><div class="flex-row"><div><b>${p.courseTitle}</b><br><small class="badge">$${p.amount}</small></div><small>${p.userEmail}</small></div><img src="${p.screenshot}" style="max-height:150px; border-radius:12px; margin:15px 0; border:1px solid #eee;"><div class="flex-row"><button class="btn btn-primary" onclick="processPay('${doc.key}','${p.userId}','${p.courseId}',true)">Approve Access</button><div style="width:10px"></div><button class="btn btn-outline" style="color:red; border-color:red;" onclick="processPay('${doc.key}','${p.userId}','${p.courseId}',false)">Reject</button></div></div>`;
+                    }
+                });
+                document.getElementById('st-rev').innerText = "$" + rev.toFixed(0);
+                payList.innerHTML = pendingHTML || '<div class="card" style="text-align:center; color:#999; border:1px dashed #ddd; box-shadow:none;">No Pending Payments</div>';
+            });
+            loadData();
+        }
+
+        function loadData() {
+            db.ref('categories').on('value', s=>{
+                const d=document.getElementById('list-cats'); d.innerHTML=''; allCats={};
+                s.forEach(c=>{
+                    allCats[c.key]=c.val().name;
+                    d.innerHTML+=`<div class="card flex-row" style="padding:15px;"><b>${c.val().name}</b><button class="btn-danger" style="width:auto" onclick="db.ref('categories/${c.key}').remove()">Delete</button></div>`;
+                });
+            });
+
+            db.ref('courses').on('value', s=>{
+                const d=document.getElementById('list-courses'); d.innerHTML='';
+                s.forEach(c=>{
+                    const course = c.val();
+                    d.innerHTML+=`<div class="card flex-row"><div style="display:flex;align-items:center; flex:1;"><img src="${course.bannerUrl || 'https://via.placeholder.com/50'}" class="list-item-img" onerror="this.src='https://via.placeholder.com/50'"><div><b>${course.title || 'Untitled'}</b><br><small style="color:#888">₹${course.price || 0}</small></div></div><div style="display:flex; gap:8px;"><button class="btn-warning-custom" onclick='editCourse("${c.key}", ${JSON.stringify(course).replace(/'/g, "\\'")})'><i class="fas fa-edit"></i> Edit</button><button class="btn-danger" style="width:auto; padding:8px 16px;" onclick="if(confirm('Delete course?')) db.ref('courses/${c.key}').remove()">Delete</button></div></div>`;
+                });
+                if(s.numChildren() === 0) d.innerHTML = '<div class="card" style="text-align:center; color:#999;">No courses yet. Click + Add to create one.</div>';
+            });
+
+            db.ref('promotions').on('value', s=>{
+                const d=document.getElementById('list-promo'); d.innerHTML='';
+                s.forEach(p=>{ d.innerHTML+=`<div class="card flex-row"><img src="${p.val().img}" height="60" style="border-radius:10px;"><button class="btn-danger" style="width:auto" onclick="db.ref('promotions/${p.key}').remove()">Remove</button></div>`; });
+            });
+
+            db.ref('appSettings').on('value', s => {
+                const v = s.val() || {};
+                document.getElementById('app-name').value = v.appName || '';
+                document.getElementById('app-logo').value = v.appLogo || '';
+                document.getElementById('app-support').value = v.supportLink || '';
+                document.getElementById('app-policy').value = v.policyText || '';
+                if(v.appLogo) { const preview = document.getElementById('app-logo-preview'); preview.src = v.appLogo; preview.style.display = 'block'; }
+                if(v.appName) { document.getElementById('admin-brand-name').innerText = v.appName; }
+                if(v.appLogo) { const l = document.getElementById('header-logo-admin'); l.src=v.appLogo; l.style.display='block'; }
+            });
+
+            db.ref('liveSession').on('value',s=>{ if(s.exists()){ const v=s.val(); document.getElementById('l-desc').value=v.description; document.getElementById('l-link').value=v.link; document.getElementById('l-stat').value=v.status; document.getElementById('l-price').value=v.price||0; }});
+            db.ref('adminSettings').on('value', s=>{ 
+                if(s.exists()){
+                    const val = s.val();
+                    document.getElementById('set-upi').value = val.upi || '';
+                    document.getElementById('set-qr').value = val.qr || '';
+                    if(val.qr) { const preview = document.getElementById('set-qr-preview'); preview.src = val.qr; preview.style.display = 'block'; }
+                }
+            });
+        }
+
+        function fillCatSelect(selectedId){ 
+            const s=document.getElementById('c-cat'); s.innerHTML=''; 
+            Object.keys(allCats).forEach(k=>s.innerHTML+=`<option value="${k}" ${selectedId === k ? 'selected' : ''}>${allCats[k]}</option>`); 
+        }
+        function saveCat(){ const n=document.getElementById('cat-name').value; if(n) db.ref('categories').push({name:n}).then(()=>{document.getElementById('cat-name').value=''; showToast('Category Added');}); }
+        function savePromo(){ 
+            const imgUrl = document.getElementById('p-img').value;
+            db.ref('promotions').push({ img: imgUrl, link: document.getElementById('p-link').value }).then(()=>{ closeModal('modal-promo'); showToast('Banner Added'); document.getElementById('p-img').value = ''; document.getElementById('p-img-preview').style.display = 'none'; }); 
+        }
+        function saveAppSets() {
+            db.ref('appSettings').update({ appName: document.getElementById('app-name').value, appLogo: document.getElementById('app-logo').value, supportLink: document.getElementById('app-support').value, policyText: document.getElementById('app-policy').value }).then(() => showToast('Branding Saved'));
+        }
+        function saveSets(){ 
+            db.ref('adminSettings').update({ upi: document.getElementById('set-upi').value, qr: document.getElementById('set-qr').value }).then(()=>showToast('Payments Saved')); 
+        }
+        function saveLive(){ db.ref('liveSession').update({ description:document.getElementById('l-desc').value, link:document.getElementById('l-link').value, price:document.getElementById('l-price').value, status:document.getElementById('l-stat').value }).then(()=>showToast('Live Updated')); }
+        function processPay(pid, uid, cid, ok){
+            const up = {}; up['payments/'+pid+'/status'] = ok?'APPROVED':'REJECTED';
+            if(ok) up['users/'+uid+'/courses/'+cid] = true;
+            db.ref().update(up).then(()=>showToast(ok?'Granted Access':'Payment Rejected'));
+        }
+        function toggleNEmail(){ document.getElementById('n-email-div').style.display = document.getElementById('n-to').value==='SINGLE' ? 'block':'none'; }
+        function sendNotify(){
+            const t=document.getElementById('n-to').value;
+            db.ref('notifications').push({ targetType:t, targetEmail:document.getElementById('n-email').value, message:document.getElementById('n-msg').value, link:document.getElementById('n-link').value, timestamp:Date.now() }).then(()=>showToast('Sent!'));
+        }
+        
+   // ========== APP MANAGER FUNCTIONS (NEW) ==========
+let editingAppId = null;
+
+function openAddAppModal() {
+    editingAppId = null;
+    document.getElementById('app-modal-title').innerHTML = '<i class="fas fa-mobile-alt"></i> Add New App';
+    document.getElementById('edit-app-id').value = '';
+    document.getElementById('app-mgr-name').value = '';
+    document.getElementById('app-mgr-category').value = 'Games';
+    document.getElementById('app-mgr-size').value = '';
+    document.getElementById('app-mgr-version').value = '';
+    document.getElementById('app-mgr-icon').value = '📱';
+    document.getElementById('app-mgr-desc').value = '';
+    document.getElementById('app-mgr-freeWithAd').value = 'true';
+    document.getElementById('app-mgr-price').value = '0';
+    document.getElementById('app-mgr-url').value = '';
+    document.getElementById('app-file-name').innerText = '';
+    document.getElementById('app-mgr-file').value = '';
+    document.getElementById('app-icon-preview').style.display = 'none';
+document.getElementById('app-icon-file').value = '';
+    openModal('modal-app');
+
+}
+
+function editApp(appId, appData) {
+    editingAppId = appId;
+    document.getElementById('app-modal-title').innerHTML = '<i class="fas fa-edit"></i> Edit App';
+    document.getElementById('edit-app-id').value = appId;
+    document.getElementById('app-mgr-name').value = appData.name || '';
+    document.getElementById('app-mgr-category').value = appData.category || 'Games';
+    document.getElementById('app-mgr-size').value = appData.size || '';
+    document.getElementById('app-mgr-version').value = appData.version || '';
+    document.getElementById('app-mgr-icon').value = appData.icon || '📱';
+    document.getElementById('app-mgr-desc').value = appData.description || '';
+    document.getElementById('app-mgr-freeWithAd').value = appData.freeWithAd !== false ? 'true' : 'false';
+    document.getElementById('app-mgr-price').value = appData.premiumPrice || 0;
+    document.getElementById('app-mgr-url').value = appData.downloadUrl || '';
+    document.getElementById('app-file-name').innerText = '';
+    document.getElementById('app-mgr-file').value = '';
+    // Icon preview for edit
+const iconPreview = document.getElementById('app-icon-preview');
+if (appData.icon && (appData.icon.startsWith('http') || appData.icon.startsWith('https'))) {
+    iconPreview.src = appData.icon;
+    iconPreview.style.display = 'block';
+} else {
+    iconPreview.style.display = 'none';
+}
+document.getElementById('app-mgr-icon').value = appData.icon || '📱';
+    openModal('modal-app');
+}
+
+function handleAppFileUpload(fileInput) {
+    const file = fileInput.files[0];
+    if (file) {
+        document.getElementById('app-file-name').innerText = '📁 ' + file.name;
+        document.getElementById('app-mgr-url').value = '/storage/emulated/0/Download/Live admin/' + file.name;
+    }
+}
+
+function saveApp() {
+    const appData = {
+        name: document.getElementById('app-mgr-name').value,
+        category: document.getElementById('app-mgr-category').value,
+        size: document.getElementById('app-mgr-size').value,
+        version: document.getElementById('app-mgr-version').value,
+        icon: document.getElementById('app-mgr-icon').value,
+        description: document.getElementById('app-mgr-desc').value,
+        freeWithAd: document.getElementById('app-mgr-freeWithAd').value === 'true',
+        premiumPrice: parseInt(document.getElementById('app-mgr-price').value) || 0,
+        downloadUrl: document.getElementById('app-mgr-url').value,
+        downloadCount: 0,
+        lastUpdated: Date.now()
+    };
+    
+    if (!appData.name) return showToast('Please enter app name');
+    if (!appData.downloadUrl) return showToast('Please enter download URL or upload file');
+    
+    if (editingAppId) {
+        db.ref('apps/' + editingAppId).update(appData)
+            .then(() => { showToast('App Updated Successfully!'); closeModal('modal-app'); })
+            .catch(err => showToast('Error: ' + err.message));
+    } else {
+        db.ref('apps').push(appData)
+            .then(() => { showToast('App Added Successfully!'); closeModal('modal-app'); })
+            .catch(err => showToast('Error: ' + err.message));
+    }
+}
+
+function deleteApp(appId) {
+    if (!confirm('Delete this app? Users will no longer see it.')) return;
+    db.ref('apps/' + appId).remove()
+        .then(() => showToast('App deleted!'))
+        .catch(err => showToast('Error: ' + err.message));
+}
+
+function loadAppsList() {
+    db.ref('apps').on('value', function(s) {
+        var container = document.getElementById('list-apps');
+        if (!container) return;
+        container.innerHTML = '';
+        
+        if (!s.exists() || s.numChildren() === 0) {
+            container.innerHTML = '<div class="card" style="text-align:center; color:#999; border:1px dashed #ddd;">No apps added yet. Click + Add to create one.</div>';
+            return;
+        }
+        
+        var apps = [];
+        s.forEach(function(app) {
+            apps.push({ id: app.key, name: app.val().name, category: app.val().category, size: app.val().size, version: app.val().version, icon: app.val().icon, description: app.val().description, freeWithAd: app.val().freeWithAd, premiumPrice: app.val().premiumPrice, downloadUrl: app.val().downloadUrl, downloadCount: app.val().downloadCount, lastUpdated: app.val().lastUpdated });
+        });
+        
+        apps.sort(function(a, b) { return (b.lastUpdated || 0) - (a.lastUpdated || 0); });
+        
+        apps.forEach(function(app) {
+            var iconEmoji = app.icon || '📱';
+            var isFree = app.freeWithAd !== false;
+            var priceText = isFree ? '🆓 Free' : '💎 ₹' + (app.premiumPrice || 0);
+            var downloadCount = app.downloadCount || 0;
+            
+            var iconHtml = (app.icon && (app.icon.indexOf('http://') === 0 || app.icon.indexOf('https://') === 0)) 
+                ? '<img src="' + app.icon + '" style="width:44px;height:44px;object-fit:cover;border-radius:12px;" loading="lazy">' 
+                : iconEmoji;
+            
+            var cardHtml = '';
+            cardHtml += '<div class="card" style="padding:10px 12px; margin-bottom:8px;">';
+            cardHtml += '<div class="flex-row" style="gap:10px; align-items:center;">';
+            cardHtml += '<div style="width:44px;height:44px;min-width:44px;border-radius:12px;background:linear-gradient(135deg,#6366f1,#8b5cf6);display:flex;align-items:center;justify-content:center;overflow:hidden;font-size:1.3rem;">' + iconHtml + '</div>';
+            cardHtml += '<div style="flex:1;min-width:0;">';
+            cardHtml += '<div style="font-weight:600;font-size:0.85rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + escapeHtml(app.name) + '</div>';
+            cardHtml += '<div style="font-size:0.65rem;color:#888;margin-top:1px;">';
+            cardHtml += '<span style="background:rgba(108,99,255,0.1);color:#6C63FF;padding:1px 6px;border-radius:4px;font-weight:600;">' + (app.category || 'General') + '</span>';
+            cardHtml += ' &bull; ' + (app.size || 'N/A') + ' &bull; v' + (app.version || '1.0');
+            cardHtml += '</div>';
+            cardHtml += '<div style="font-size:0.65rem;color:#aaa;margin-top:1px;">' + priceText + ' &bull; 📥 ' + downloadCount + '</div>';
+            cardHtml += '</div>';
+            cardHtml += '<div style="display:flex;gap:5px;flex-shrink:0;">';
+            cardHtml += '<button class="btn-warning-custom" style="padding:5px 8px;font-size:0.65rem;border-radius:6px;" onclick="editAppDirect(\'' + app.id + '\')"><i class="fas fa-edit"></i></button>';
+            cardHtml += '<button class="btn-danger" style="padding:5px 8px;font-size:0.65rem;border-radius:6px;" onclick="deleteApp(\'' + app.id + '\')"><i class="fas fa-trash"></i></button>';
+            cardHtml += '</div>';
+            cardHtml += '</div>';
+            cardHtml += '</div>';
+            
+            container.innerHTML += cardHtml;
+        });
+    });
+}
+
+var originalNav = nav;
+nav = function(s) {
+    originalNav(s);
+    if (s === 'app-manager') {
+        loadAppsList();
+    }
+};
+
+var originalInit = init;
+init = function() {
+    originalInit();
+    loadAppsList();
+};
+
+// ========== APP ICON UPLOAD ==========
+async function uploadAppIcon(fileInput) {
+    const file = fileInput.files[0];
+    if (!file) return;
+    
+    const iconInput = document.getElementById('app-mgr-icon');
+    const preview = document.getElementById('app-icon-preview');
+    
+    iconInput.value = 'Uploading...';
+    showToast('Uploading icon...');
+    
+    const formData = new FormData();
+    formData.append('image', file);
+    
+    try {
+        const response = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, { 
+            method: 'POST', 
+            body: formData 
+        });
+        const data = await response.json();
+        
+        if (data.success) {
+            const url = data.data.url;
+            iconInput.value = url;
+            preview.src = url;
+            preview.style.display = 'block';
+            showToast('Icon uploaded successfully!');
+        } else {
+            showToast('Upload failed');
+            iconInput.value = '';
+            preview.style.display = 'none';
+        }
+    } catch (error) {
+        showToast('Upload error');
+        iconInput.value = '';
+        preview.style.display = 'none';
+    }
+    fileInput.value = '';
+}
+
+
+// ========== EDIT APP DIRECT (FIXED) ==========
+function editAppDirect(appId) {
+    db.ref('apps/' + appId).once('value', snapshot => {
+        const appData = snapshot.val();
+        if (appData) {
+            editingAppId = appId;
+            document.getElementById('app-modal-title').innerHTML = '<i class="fas fa-edit"></i> Edit App';
+            document.getElementById('edit-app-id').value = appId;
+            document.getElementById('app-mgr-name').value = appData.name || '';
+            document.getElementById('app-mgr-category').value = appData.category || 'Games';
+            document.getElementById('app-mgr-size').value = appData.size || '';
+            document.getElementById('app-mgr-version').value = appData.version || '';
+            document.getElementById('app-mgr-icon').value = appData.icon || '📱';
+            document.getElementById('app-mgr-desc').value = appData.description || '';
+            document.getElementById('app-mgr-freeWithAd').value = appData.freeWithAd !== false ? 'true' : 'false';
+            document.getElementById('app-mgr-price').value = appData.premiumPrice || 0;
+            document.getElementById('app-mgr-url').value = appData.downloadUrl || '';
+            document.getElementById('app-file-name').innerText = '';
+            document.getElementById('app-mgr-file').value = '';
+            
+            // Icon preview
+            const iconPreview = document.getElementById('app-icon-preview');
+            if (appData.icon && (appData.icon.startsWith('http://') || appData.icon.startsWith('https://'))) {
+                iconPreview.src = appData.icon;
+                iconPreview.style.display = 'block';
+            } else {
+                iconPreview.style.display = 'none';
+            }
+            
+            openModal('modal-app');
+        } else {
+            showToast('App not found!');
+        }
+    });
+}
+
+function sendPushNotification() {
+    var title = document.getElementById('push-title').value;
+    var msg = document.getElementById('push-msg').value;
+    var link = document.getElementById('push-link').value;
+    
+    if (!title || !msg) {
+        showToast('Please fill title and message');
+        return;
+    }
+    
+    // Firebase DB mein save karo (in-app notification)
+    db.ref('push_notifications').push({
+        title: title,
+        message: msg,
+        link: link,
+        target: 'ALL',
+        timestamp: Date.now()
+    });
+    
+    // FCM tokens leke sabko bhejo
+    db.ref('fcmTokens').once('value', function(snap) {
+        var tokens = [];
+        snap.forEach(function(t) {
+            tokens.push(t.val().token);
+        });
+        
+        if (tokens.length === 0) {
+            showToast('No users subscribed yet');
+            return;
+        }
+        
+        // FCM API call
+        fetch('https://fcm.googleapis.com/fcm/send', {
+            method: 'POST',
+            headers: {
+                'Authorization': 'key=AIzaSyASeoEoE8TG3yoBxjO7TaVrM_ZNZnUCvLc',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                registration_ids: tokens,
+                notification: {
+                    title: title,
+                    body: msg
+                },
+                data: {
+                    link: link || '/'
+                }
+            })
+        }).then(function(res) {
+            return res.json();
+        }).then(function(data) {
+            console.log('Push sent:', data);
+            showToast('✅ Notification sent to ' + tokens.length + ' users!');
+        }).catch(function(err) {
+            console.log('Push error:', err);
+            showToast('❌ Failed to send');
+        });
+    });
+    
+    document.getElementById('push-title').value = '';
+    document.getElementById('push-msg').value = '';
+    document.getElementById('push-link').value = '';
+}
+
+
+    </script>
+</body>
+</html>
